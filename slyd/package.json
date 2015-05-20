@@ -27,6 +27,7 @@
     "ember-breadcrumbs": "^0.1.1",
     "ember-cli": "0.1.5",
     "ember-cli-auto-register-helpers": "0.0.3",
+    "ember-cli-clock": "^1.0.3",
     "ember-cli-content-security-policy": "0.3.0",
     "ember-cli-dependency-checker": "0.0.7",
     "ember-cli-esnext": "0.1.1",
