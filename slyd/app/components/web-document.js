@@ -102,6 +102,13 @@ export default Ember.Component.extend({
     },
 
     /**
+        Returns the document iFrame node.
+    */
+    getIframeNode: function() {
+        return Ember.$('#' + this.get('iframeId'))[0];
+    },
+
+    /**
         Redraws all datasource sprites and the hovered element (if in select
         mode). This method can be called manually but it gets called
         automatically:
@@ -154,7 +161,7 @@ export default Ember.Component.extend({
             // until we trigger the callback.
             this.setInteractionsBlocked(true);
             Ember.run.later(this, function() {
-                var doc = document.getElementById(this.get('iframeId')).contentWindow.document;
+                var doc = this.getIframeNode().contentWindow.document;
                 doc.onscroll = this.redrawNow.bind(this);
                 this.setInteractionsBlocked(false);
                 if (readyCallback) {
@@ -267,7 +274,7 @@ export default Ember.Component.extend({
     scrollToElement: function(element) {
         var rect = Ember.$(element).boundingBox();
         this.updateHoveredInfo(element);
-        Ember.$('#' + this.get('iframeId')).get(0).contentWindow.scrollTo(
+        this.getIframeNode().contentWindow.scrollTo(
             Math.max(0, parseInt(rect.left - 100)),
             Math.max(0, parseInt(rect.top - 100))
         );

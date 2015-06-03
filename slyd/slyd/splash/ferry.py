@@ -13,10 +13,13 @@ from splash import network_manager
 from splash.browser_tab import BrowserTab
 from splash.render_options import RenderOptions
 
+from PyQt4.QtCore import QObject
+from PyQt4.QtCore import pyqtSlot
+from PyQt4.QtWebKit import QWebElement
+
 from slybot.spider import IblSpider
 
-from .commands import (fetch_page, fetch_response, interact_page, close_tab,
-                       extract, updates, resize)
+from .commands import load_page, interact_page, close_tab, resize, metadata
 
 _DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'
 _DEFAULT_VIEWPORT = '1240x680'
@@ -67,17 +70,39 @@ class SpiderSpec(object):
         return self.spider['templates']
 
 
-class FerryServerProtocol(WebSocketServerProtocol):
+class PortiaJSApi(QObject):
+    def __init__(self, protocol):
+        super(PortiaJSApi, self).__init__()
+        self.protocol = protocol
 
+    @pyqtSlot(QWebElement)
+    def returnElement(self, element):
+        """ Hack to return an DOM node as a QWebElement instead of QVariant(QVariantMap) """
+        self.element = element
+
+    def getReturnedElement(self):
+        element = self.element
+        self.element = None
+        return element
+
+    @pyqtSlot(str)
+    def sendMessage(self, message):
+        command, data = json.loads(unicode(message))
+        self.protocol.sendMessage({
+            '_command': command,
+            '_data': data
+        })
+        if command == 'mutation':
+            self.protocol.sendMessage(metadata(self.protocol))
+
+
+class FerryServerProtocol(WebSocketServerProtocol):
     _handlers = {
-        'fetch': fetch_page,
+        'load': load_page,
         'interact': interact_page,
         'close_tab': close_tab,
-        'extract': extract,
-        'heartbeat': lambda d, s: {},
-        'updates': updates,
+        'heartbeat': lambda d, s: None,
         'resize': resize,
-        'loadCurrent': fetch_response
     }
     spec_manager = None
     settings = None
@@ -116,10 +141,10 @@ class FerryServerProtocol(WebSocketServerProtocol):
         data = json.loads(payload)
         if '_command' in data and data['_command'] in self._handlers:
             command = data['_command']
-            result = self._handlers[command](data, self) or {}
-            if '_command' not in result:
-                result['_command'] = data.get('_callback') or command
-            self.sendMessage(result)
+            result = self._handlers[command](data, self)
+            if result:
+                result['_command'] = result['_command'] or data.get('_callback') or command
+                self.sendMessage(result)
         else:
             command = data.get('_command')
             if command:
@@ -140,6 +165,10 @@ class FerryServerProtocol(WebSocketServerProtocol):
             is_binary
         )
 
+    def getElementByNodeId(self, nodeid):
+        self.tab.web_page.mainFrame().evaluateJavaScript('livePortiaPage.pyGetByNodeId(%s)' % nodeid);
+        return self.js_api.getReturnedElement()
+
     def open_tab(self, meta=None):
         if meta is None:
             meta = {}
@@ -155,22 +184,23 @@ class FerryServerProtocol(WebSocketServerProtocol):
             render_options=RenderOptions(data, defaults.MAX_TIMEOUT),
             visible=True,
         )
+        main_frame = self.tab.web_page.mainFrame()
+
+        main_frame.loadStarted.connect(self._on_load_started)
+        self.js_api = PortiaJSApi(self)
+        main_frame.javaScriptWindowObjectCleared.connect(self.populate_window_object)
+
         self.tab.set_images_enabled(False)
         self.tab.set_viewport(meta.get('viewport', _DEFAULT_VIEWPORT))
         self.tab.set_user_agent(meta.get('user_agent', _DEFAULT_USER_AGENT))
-        self.tab.web_page.mainFrame().loadStarted.connect(
-            self._on_load_started)
-        self.tab.web_page.mainFrame().loadFinished.connect(
-            self._on_load_finished)
-        # self.tab._jsconsole_enable()
         self.tab.loaded = False
 
     def _on_load_started(self):
         self.sendMessage({'_command': 'loadStarted'})
 
-    def _on_load_finished(self):
-        self.sendMessage({'_command': 'loadFinished',
-                          'url': self.tab.url})
+    def populate_window_object(self):
+        self.tab.web_page.mainFrame().addToJavaScriptWindowObject('__portiaApi', self.js_api)
+        self.tab.run_js_files('/app/slyd/dist/splash_content_scripts', handle_errors=False)
 
     def open_spider(self, meta):
         if ('project' not in meta or 'spider' not in meta or
