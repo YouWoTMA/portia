@@ -1,7 +1,8 @@
 import Ember from 'ember';
-import SpiderController from '../spider';
+import BaseController from '../base-controller';
 
-export default SpiderController.extend({
+export default BaseController.extend({
+    needs: ['spider'],
     queryParams: 'url',
     url: null,
 
@@ -16,7 +17,7 @@ export default SpiderController.extend({
         var url = this.url;
         this.set('url', null);
         Ember.run.next(this, function() {
-            this.fetchPage(url, null, true);
+            this.get('controllers.spider').fetchPage(url, null, true);
         });
     },
 
