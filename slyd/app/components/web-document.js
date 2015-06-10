@@ -330,25 +330,12 @@ export default Ember.Component.extend({
     initHoveredInfo: function() {
         var contents = '<div>' +
             '<span class="path"/>' +
-            '<button class="btn btn-light fa fa-icon fa-arrow-right"/>' +
             '</div>' +
             '<div class="attributes"/>';
-        Ember.$('#hovered-element-info').html(contents);
-        Ember.$('#hovered-element-info button').click(function() {
-                var element = Ember.$('#hovered-element-info');
-                var button = element.find('button');
-                button.removeClass('fa-arrow-right');
-                button.removeClass('fa-arrow-left');
-                var floatPos = element.css('float');
-                if (floatPos === 'left') {
-                    floatPos = 'right';
-                    button.addClass('fa-arrow-left');
-                } else {
-                    floatPos = 'left';
-                    button.addClass('fa-arrow-right');
-                }
-                element.css('float', floatPos);
-            });
+        Ember.$('#hovered-element-info').html(contents).mouseenter(function() {
+            var element = Ember.$(this);
+            element.css('float', element.css('float') === 'left' ? 'right': 'left');
+        });
     },
 
     updateHoveredInfo: function(element) {
