@@ -1,8 +1,6 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    classNameBindings: ['fixed:toolbox-fixed'],
-
     documentView: function() {
         this.set('documentView', this.get('document.view'));
     }.property('document.view'),
@@ -31,6 +29,7 @@ export default Ember.Component.extend({
         }
         Ember.$('#toolbox').css('margin-right', show ? 0 : -365);
         Ember.$('#scraped-doc').css('margin-right', show ? 400 : 35);
+        this.set('open', show);
 
         Ember.run.later(this, function(){
             var docView = this.get('documentView');

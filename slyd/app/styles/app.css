@@ -165,7 +165,7 @@ body{
     overflow-x: hidden;
 }
 
-.toolbox-fixed .fa-thumb-tack, .toolbox-fixed .arrow-left {
+#toolbox.fixed .fa-thumb-tack, #toolbox.closed .fa-thumb-tack, #toolbox.fixed .arrow-left {
     display: none;
 }
 
