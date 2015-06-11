@@ -24,6 +24,8 @@ var app = new EmberApp({
 
 app.import('bower_components/ic-ajax/dist/named-amd/main.js');
 app.import('bower_components/canvasloader/js/heartcode-canvasloader-min.js');
+app.import('bower_components/google-diff-match-patch-js/diff_match_patch.js');
+app.import('vendor/selectorgadget-dom.js');
 app.import('vendor/uri.js');
 app.import('vendor/bootstrap.min.js');
 app.import('vendor/jquery.binarytransport.js');

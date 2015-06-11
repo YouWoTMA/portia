@@ -3,6 +3,8 @@ import BaseController from './base-controller';
 import Extractor from '../models/extractor';
 import MappedFieldData from '../models/mapped-field-data';
 import SpriteStore from '../utils/sprite-store';
+import { ElementSprite } from '../utils/canvas';
+import CSSSelectorPlugin from '../components/css-selector-plugin/component';
 
 export default BaseController.extend({
 
@@ -286,7 +288,42 @@ export default BaseController.extend({
         this.set('showFloatingAnnotationWidgetAt', null);
     },
 
+    cssSelectorPreview: function(){
+        Ember.run.debounce(this, this._cssSelectorPreview, 500);
+    }.observes('cssSelectorComposerValue'),
+
+    _cssSelectorPreview: function(){
+        var selector = this.get('cssSelectorComposerValue');
+        var documentView = this.get('documentView');
+        var elements;
+        documentView.elementSelectionEnabled = false;
+
+        try {
+            elements = documentView.getIframe().find(selector);
+        } catch(e){
+            this.set('cssSelectorComposerValid', false);
+            return;
+        }
+        this.set('cssSelectorComposerValid', true);
+
+        var ss = new SpriteStore();
+        this.set('documentView.sprites', ss);
+        elements.each(function(i, elm){
+            ss.addSprite(elm, '');
+        });
+    },
+
     actions: {
+
+        setCss: function(){
+            console.log('setcss');
+            this.enableExtractionTool('css-selector-plugin');
+            var component = CSSSelectorPlugin.create({
+                template: this,
+                documentView: this.get('documentView')
+            });
+        },
+
 
         createField: function(item, fieldName, fieldType) {
             item.addField(fieldName, fieldType);

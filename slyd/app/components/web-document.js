@@ -103,6 +103,9 @@ export default Ember.Component.extend({
         return Ember.$('#' + this.get('iframeId')).contents();
     },
 
+    redrawSoon: function(){
+        return Ember.run.debounce(this, this.redrawNow, 100);
+    },
     /**
         Redraws all datasource sprites and the hovered element (if in select
         mode). This method can be called manually but it gets called
@@ -157,7 +160,7 @@ export default Ember.Component.extend({
             this.setInteractionsBlocked(true);
             Ember.run.later(this, function() {
                 var doc = document.getElementById(this.get('iframeId')).contentWindow.document;
-                doc.onscroll = this.redrawNow.bind(this);
+                doc.onscroll = this.redrawSoon.bind(this);
                 this.setInteractionsBlocked(false);
                 if (readyCallback) {
                     readyCallback(this.getIframe());
@@ -248,7 +251,7 @@ export default Ember.Component.extend({
                 Ember.$(this).renameAttr('_style', 'style');
             });
         }
-        this.redrawNow();
+        this.redrawSoon();
         this.cssEnabled = !this.cssEnabled;
     },
 
@@ -392,7 +395,7 @@ export default Ember.Component.extend({
 
     mouseOutHandler: function() {
         this.set('hoveredSprite', null);
-        this.redrawNow();
+        this.redrawSoon();
     },
 
     clickHandler: function(event) {
@@ -417,7 +420,7 @@ export default Ember.Component.extend({
         }
         this.set('hoveredSprite', null);
         this.set('mouseDown', true);
-        this.redrawNow();
+        this.redrawSoon();
     },
 
     mouseUpHandler: function(event) {
@@ -472,7 +475,7 @@ export default Ember.Component.extend({
         this.updateHoveredInfo(element);
         this.set('hoveredSprite',
                  ElementSprite.create({'element': element}));
-        this.redrawNow();
+        this.redrawSoon();
     },
 
     initCanvas: function() {
@@ -480,9 +483,7 @@ export default Ember.Component.extend({
             this.set('canvas', Canvas.create({ canvasId: 'infocanvas' }));
             this.initHoveredInfo();
             if (!Ember.testing){
-                window.resize = function() {
-                    this.redrawNow();
-                }.bind(this);
+                window.resize = this.redrawSoon.bind(this);
             }
         }
     },
