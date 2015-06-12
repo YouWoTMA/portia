@@ -22,14 +22,19 @@
 	{{/accordion-item}}
 
 	{{#accordion-item title="Selectors"}}
-		<div {{bind-attr class=":form-inline cssSelectorComposerValid:has-success:has-error"}}>
-			{{input value=cssSelectorComposerValue class="form-control"}}
-		</div>
+		{{#if selectorByClick }}
+			<pre class="selector-by-click well">{{cssSelectorComponent.selector}}
+{{cssSelectorComponent.matches.length}} matches</pre>
+		{{else}}
+			<div {{bind-attr class=":form-inline cssSelectorComposerValid:has-success:has-error"}}>
+				{{input value=cssSelectorComposerValue class="form-control"}}
+			</div>
+			{{#bs-button clicked="setCss" type="primary" size="sm"}}
+				Find selector by clicking
+			{{/bs-button}}
+		{{/if}}
 		{{#bs-button clicked="addCss" type="primary" size="sm"}}
 			Add css
-		{{/bs-button}}
-		{{#bs-button clicked="setCss" type="primary" size="sm"}}
-			Find selector by clicking
 		{{/bs-button}}
 	{{/accordion-item}}
 

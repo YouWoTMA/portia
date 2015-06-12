@@ -11,9 +11,10 @@ export default Ember.Component.extend({
     selected: new Ember.Set([]),
     restricted: new Ember.Set([]),
     matches: new Ember.Set([]),
+    selector: '',
     colors: {
-        matched: rgba(0xee, 0xff, 0xee),
-        selected: rgba(0x90, 0xff, 0x99, 0.6),
+        matched: rgba(0x99, 0xff, 0x99),
+        selected: rgba(0x30, 0xff, 0x30, 0.9),
         restricted: rgba(0xff, 0x90, 0x90),
         select: rgba(0x90, 0xff, 0x90, 0.9),
         restrict: rgba(0xff, 0x90, 0x90, 0.9),
@@ -41,6 +42,7 @@ export default Ember.Component.extend({
     update: function(){
         var selected = $(this.selected), restricted = $(this.restricted);
         var selector = predictionHelper.predictCss(selected, restricted);
+        this.set('selector', selector);
         this.set('matches', new Ember.Set(this.get('documentView').getIframe().find(selector)));
         this.set('documentView.sprites', this);
         this.get('documentView').redrawNow();

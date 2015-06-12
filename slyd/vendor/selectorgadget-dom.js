@@ -31,7 +31,7 @@ window.DomPredictionHelper = DomPredictionHelper = (function() {
 
   DomPredictionHelper.prototype.recursiveNodes = function(e) {
     var n;
-    if (e.nodeName && e.parentNode && e.parentNode.tagName !== 'HTML') {
+    if (e.nodeName && e.parentElement && e.parentElement !== e.ownerDocument.documentElement) {
       n = this.recursiveNodes(e.parentNode);
     } else {
       n = new Array();
@@ -421,14 +421,64 @@ window.DomPredictionHelper = DomPredictionHelper = (function() {
     return out;
   };
 
+  DomPredictionHelper.prototype.commonAncestor = function(elements) {
+    var candidates, i, j, k, l, ref, ref1;
+    candidates = elements.eq(0).parents();
+    for (i = k = ref = candidates.length - 2; ref <= 0 ? k <= 0 : k >= 0; i = ref <= 0 ? ++k : --k) {
+      for (j = l = 1, ref1 = elements.length; 1 <= ref1 ? l <= ref1 : l >= ref1; j = 1 <= ref1 ? ++l : --l) {
+        if (!$.contains(candidates[i], elements[j])) {
+          return candidates[i + 1];
+        }
+      }
+    }
+    return candidates[0];
+  };
+
+  DomPredictionHelper.prototype.mostProlificAntecestor = function(element) {
+    var antecesors, candidate, i, k, ref;
+    antecesors = element.parentsUntil(element[0].ownerDocument.documentElement);
+    candidate = antecesors[antecesors.length - 1];
+    for (i = k = ref = antecesors.length - 2; ref <= 0 ? k <= 0 : k >= 0; i = ref <= 0 ? ++k : --k) {
+      if (candidate.childElementCount <= antecesors[i].childElementCount) {
+        candidate = antecesors[i];
+      }
+    }
+    return candidate;
+  };
+
+  DomPredictionHelper.prototype.findRejectedByScope = function(scope, tagName) {
+    var all, inscope;
+    console.log(scope, tagName, scope.ownerDocument);
+    all = $(tagName, scope.ownerDocument);
+    inscope = $(tagName, scope);
+    console.log('findRejectedByScope', all, inscope, all.not(inscope), all.filter(inscope));
+    return all.not(inscope);
+  };
+
   DomPredictionHelper.prototype.predictCss = function(s, r) {
-    var css, k, len, selected, selected_paths, simplest, union;
+    var css, k, len, scope, selected, selected_paths, simplest, union;
     if (s.length === 0) {
       return '';
     }
+    if (r.length === 0 && s.filter(function(i, e) {
+      return e.tagName !== s[0].tagName;
+    }).length === 0) {
+      if (s.length > 1) {
+        scope = this.commonAncestor(s);
+        console.log('commonAncestor of', s, scope);
+      } else {
+        scope = this.mostProlificAntecestor(s);
+      }
+      console.log('scope', scope);
+      r = this.findRejectedByScope(scope, s[0].tagName);
+      console.log('rejected', r);
+    }
     selected_paths = this.getPathsFor(s);
+    console.log(selected_paths);
     css = this.cssDiff(selected_paths);
-    simplest = this.simplifyCss(css, s, r);
+    console.log(css);
+    simplest = this.simplifyCss(css, s, r, scope);
+    console.log(simplest);
     if (simplest.length > 0) {
       return simplest;
     }

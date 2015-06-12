@@ -316,12 +316,12 @@ export default BaseController.extend({
     actions: {
 
         setCss: function(){
-            console.log('setcss');
             this.enableExtractionTool('css-selector-plugin');
-            var component = CSSSelectorPlugin.create({
+            this.set('selectorByClick', true);
+            this.set('cssSelectorComponent', CSSSelectorPlugin.create({
                 template: this,
                 documentView: this.get('documentView')
-            });
+            }));
         },
 
 
