@@ -46,7 +46,7 @@ class Annotations(object):
         """
         _item_template_pages = sorted((
             [t['scrapes'], dict_to_page(t, 'annotated_body'),
-             t.get('extractors', [])]
+             t.get('extractors', []), t.get('selectors', {})]
             for t in spec['templates'] if t.get('page_type', 'item') == 'item'
         ), key=lambda pair: pair[0])
 
@@ -55,6 +55,7 @@ class Annotations(object):
         self.rss_link_extractor = RssLinkExtractor()
         for itemclass_name, triplets in groupby(_item_template_pages,
                                                 itemgetter(0)):
+            triplets = list(triplets)
             page_extractors_pairs = map(itemgetter(1, 2), triplets)
             schema = items[itemclass_name]
             item_cls = SlybotItem.create_iblitem_class(schema)
@@ -68,9 +69,11 @@ class Annotations(object):
 
             extractor = InstanceBasedLearningExtractor(page_descriptor_pairs)
 
+            selectors = reduce(lambda x, y: x.update(y) or x, map(itemgetter(3), triplets), {})
             self.itemcls_info[itemclass_name] = {
                 'class': item_cls,
                 'descriptor': item_descriptor,
+                'selectors': selectors,
                 'extractor': extractor,
             }
 
@@ -87,6 +90,7 @@ class Annotations(object):
 
     def handle_html(self, response):
         htmlpage = htmlpage_from_response(response)
+        htmlpage._response = response
         items, link_regions = self.extract_items(htmlpage)
         for item in items:
             yield item
@@ -127,6 +131,14 @@ class Annotations(object):
             item['_type'] = item_cls_name
             item['_template'] = str(template.id)
             items.append(item)
+
+        selectors = self.itemcls_info[item_cls_name]['selectors']
+        if len(items) > 0 and selectors:
+            if len(items) > 1:
+                raise Exception('Only single-item supported for selectors for the moment')
+            item = items[0]
+            for field, selector in selectors.iteritems():
+                item[field] = htmlpage._response.css(selector).xpath('./text()').extract()
 
         return items, link_regions
 
