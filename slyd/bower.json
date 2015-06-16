@@ -18,7 +18,8 @@
     "fontawesome": "~4.3.0",
     "normalize.css": "~3.0.2",
     "canvasloader": "~0.9.1",
-    "google-diff-match-patch-js": "~1.0.0"
+    "google-diff-match-patch-js": "~1.0.0",
+    "babel-polyfill": "~0.0.1"
   },
   "resolutions": {
     "ember": "beta"

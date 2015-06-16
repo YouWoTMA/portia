@@ -6,6 +6,10 @@ var EmberApp = require('ember-cli/lib/broccoli/ember-app');
 var app = new EmberApp({
     vendorFiles: {
         'handlebars.js': null
+    },
+    sourcemaps: {
+      enabled: true,
+      extensions: ['js']
     }
 });
 
@@ -22,6 +26,7 @@ var app = new EmberApp({
 // please specify an object with the list of modules as keys
 // along with the exports of each module as its value.
 
+app.import('bower_components/babel-polyfill/browser-polyfill.js');
 app.import('bower_components/ic-ajax/dist/named-amd/main.js');
 app.import('bower_components/canvasloader/js/heartcode-canvasloader-min.js');
 app.import('bower_components/google-diff-match-patch-js/diff_match_patch.js');
@@ -45,6 +50,6 @@ var fontTree = pickFiles('bower_components/fontawesome/fonts', {
 var publicFiles = pickFiles('public', {
     srcDir: '/',
     destDir: '/',
-})
+});
 
 module.exports = mergeTrees([app.toTree(), fontTree, publicFiles], {overwrite: true});
