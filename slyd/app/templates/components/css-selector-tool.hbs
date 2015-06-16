@@ -1,0 +1,32 @@
+{{#if addingSelector }}
+    Type a CSS selector or click an element on the page.
+    <div {{bind-attr class=":form-inline cssSelectorValid:has-success:has-error"}}>
+        {{input value=selector class="form-control" key-press='cssSelectorPreview'}}
+    </div>
+    <div class="alert alert-info">Selector matches {{matches.size}} element(s)</div>
+
+    <div class="form-inline">
+        <label> Field Name:
+        {{input value=fieldName class="form-control"}}
+        </label>
+    </div>
+
+    {{#bs-button clicked="addSelector" type="primary" size="sm"}}
+        Add css selector
+    {{/bs-button}}
+    {{#bs-button clicked="cancel" type="danger" size="sm"}}
+        Cancel
+    {{/bs-button}}
+{{ else }}
+    <div class="scrolling-container">
+        {{#each selector in model.selectorList}}
+            <div class="selector">
+                <span class="selector">{{selector.query}}</span> → <span class="fieldname">{{selector.field}}</span>
+                <button class="btn btn-link" {{action 'removeSelector' selector.field}}>(remove)</button>
+            </div>
+        {{/each}}
+    </div>
+    {{#bs-button clicked="newSelector" type="primary" size="sm"}}
+        Add css selector
+    {{/bs-button}}
+{{/if}}
