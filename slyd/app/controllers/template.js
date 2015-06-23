@@ -76,7 +76,11 @@ export default BaseController.extend({
 
     scrapedItem: function() {
         if (!Ember.isEmpty(this.get('items'))) {
-            return this.get('items').findBy('name', this.get('model.scrapes'));
+            var item = this.get('items').findBy('name', this.get('model.scrapes'));
+            if (!item.fields) {
+                item.fields = [];
+            }
+            return item;
         } else {
             return null;
         }
@@ -299,7 +303,7 @@ export default BaseController.extend({
             if (!saveFuture) {
                 Ember.run.next(this, function() {
                     this.set('model.name', oldName);
-                })
+                });
                 return;
             }
             this.set('templateName', oldName);
@@ -393,7 +397,7 @@ export default BaseController.extend({
                 finishDiscard = function() {
                     var params = {
                         url: this.get('model.url')
-                    }
+                    };
                     if (!hasData) {
                         params.rmt = this.get('model.name');
                     }
@@ -410,7 +414,7 @@ export default BaseController.extend({
             }
 
             if (hasData) {
-                finishDiscard()
+                finishDiscard();
             } else {
                 this.get('slyd').deleteTemplate(this.get('slyd.spider'),
                                                 this.get('model.name')).then(finishDiscard);
