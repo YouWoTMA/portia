@@ -179,8 +179,8 @@ class IblSpider(Spider):
                 results.append(getattr(plugin, name)(*args))
         return results
 
-    def _handle(self, hook, response, **extrasrgs):
-        generators = self._plugin_hook(hook, response, **extrasrgs)
+    def _handle(self, hook, response, *extrasrgs):
+        generators = self._plugin_hook(hook, response, *extrasrgs)
         for item_or_request in itertools.chain(*generators):
             if isinstance(item_or_request, Request):
                 self._plugin_hook('process_request', item_or_request, response)
@@ -189,7 +189,7 @@ class IblSpider(Spider):
             yield item_or_request
 
     def handle_rss(self, response):
-        return self._handle('handle_rss', response, seen=set([]))
+        return self._handle('handle_rss', response, set([]))
 
     def handle_html(self, response):
         return self._handle('handle_html', response)
