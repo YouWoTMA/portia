@@ -24,15 +24,30 @@ script:
 - cd ../slyd
 - npm test
 - cd ../
-before_deploy: cd ./slybot
+before_deploy:
+- cd slybot
+- npm build
+- cd ../..
+- find portia -type f | grep -v -E '(/(tmp|node_modules|bower_components|slyd/(app|tests))/|/(\.|_))' | zip -@ portia.zip
+- mv portia.zip portia
+- cd portia/slybot
 deploy:
-  provider: pypi
-  distributions: sdist bdist_wheel
-  user: scrapinghub
-  password:
-    secure: S5hZT2YBncUSkPTyR5RUQnACfTsW2ZtpHeQucIamKWN+xkE8KK9O0cWUMuKQ0q3U5ShFkZdhO4PnBjvtP54Dq9IogJAudkDJCylctf4qGoIlWu01mAoJzcUfrS5KW+VolF/opBJObwG38EIOOsVy9UYq7DeQcryAAG1RuMjONAk=
-  on:
-    all_branches: true
-    tags: true
-    repo: scrapinghub/portia
-    condition: "$TRAVIS_TAG =~ ^slybot-[0-9][.][0-9]*"
+  - provider: pypi
+    distributions: sdist bdist_wheel
+    user: scrapinghub
+    password:
+      secure: S5hZT2YBncUSkPTyR5RUQnACfTsW2ZtpHeQucIamKWN+xkE8KK9O0cWUMuKQ0q3U5ShFkZdhO4PnBjvtP54Dq9IogJAudkDJCylctf4qGoIlWu01mAoJzcUfrS5KW+VolF/opBJObwG38EIOOsVy9UYq7DeQcryAAG1RuMjONAk=
+    on:
+      all_branches: true
+      tags: true
+      repo: scrapinghub/portia
+      condition: "$TRAVIS_TAG =~ ^slybot-[0-9][.][0-9]*"
+  - provider: releases
+    skip_cleanup: true
+    api_key:
+      secure: hIKWj8oNCGxy/KGYIDb3AljH6fJV02ZhmhR0PzElzlZjf63LklPmmxl2nuTpzRfpKAwlkOjUmkhOCDIizTxzOVl0ZoPg7d6HcktsCj5KIeBxhxbHrIsZmm3DWmomMPz88k6dUBlT0vKK1nyZqu4tg8lqyabFBrzQircq9GLLyBU=
+    file: portia.zip
+    on:
+      repo: Youwotma/portia
+      tags: true
+      all_branches: true
