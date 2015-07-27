@@ -184,6 +184,7 @@ class Fetch(BotResource):
         except IOError as ex:
             if ex.errno == errno.ENOENT:
                 log.msg("skipping extraction, no spec: %s" % ex.filename)
+                return None, None
             else:
                 raise
 
