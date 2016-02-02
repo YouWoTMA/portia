@@ -10,8 +10,6 @@ import six
 import itertools
 from monotonic import monotonic
 
-from scrapy.settings import Settings
-
 import slyd.splash.utils
 
 from twisted.python import log
