@@ -335,12 +335,12 @@ class ItemSchema(SlydSchema):
     )
     item_annotation = fields.Relationship(
         related_url='/api/projects/{project_id}/spider/{spider_id}/samples/'
-                    '{sample_id}/items/{item_id}/item_annotation',
+                    '{sample_id}/item_annotations/{annotation_id}',
         related_url_kwargs={'project_id': '<project_id>',
                             'spider_id': '<spider_id>',
                             'sample_id': '<sample_id>',
-                            'item_id': '<id>'},
-        include_data=True, type_='item_annotations'
+                            'item_annotation_id': '<item_annotation_id>'},
+        type_='item_annotations'
     )
 
     class Meta:
