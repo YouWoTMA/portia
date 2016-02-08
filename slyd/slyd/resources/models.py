@@ -267,7 +267,7 @@ class ItemAnnotationSchema(BaseAnnotationSchema):
     container_id = fields.Str()
     repeated = fields.Boolean()
     repeated_container_id = fields.Str(dump_only=True)
-    repeated_tag_id = fields.Str(dump_only=True)
+    repeated_accept_selectors = fields.Str(dump_only=True)
     siblings = fields.Integer()
     parent_field = fields.Str()
     schema = fields.Relationship(
@@ -335,12 +335,12 @@ class ItemSchema(SlydSchema):
     )
     item_annotation = fields.Relationship(
         related_url='/api/projects/{project_id}/spider/{spider_id}/samples/'
-                    '{sample_id}/items/{item_id}/item_annotation',
+                    '{sample_id}/item_annotations/{annotation_id}',
         related_url_kwargs={'project_id': '<project_id>',
                             'spider_id': '<spider_id>',
                             'sample_id': '<sample_id>',
-                            'item_id': '<id>'},
-        include_data=True, type_='item_annotations'
+                            'item_annotation_id': '<item_annotation_id>'},
+        type_='item_annotations'
     )
 
     class Meta:
